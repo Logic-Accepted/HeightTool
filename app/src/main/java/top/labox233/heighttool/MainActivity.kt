@@ -1,5 +1,6 @@
 package top.labox233.heighttool
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -182,12 +183,15 @@ class MainActivity : AppCompatActivity() {
         popupMenu.show()
     }
 
+    @SuppressLint("StaticFieldLeak")
     private inner class SendGetRequestTask : AsyncTask<String, Void, String>() {
         // 等待api回应时的加载环
+        @Deprecated("Deprecated in Java")
         override fun onPreExecute() {
             progressBar.visibility = View.VISIBLE
         }
 
+        @Deprecated("Deprecated in Java")
         override fun doInBackground(vararg params: String?): String {
             val urlString = params[0]
 
@@ -250,6 +254,8 @@ class MainActivity : AppCompatActivity() {
             //保存到内部存储得了，到时候如果有必要就加一个判断要不要保存到sd卡
         }
 
+        @Deprecated("Deprecated in Java")
+        @SuppressLint("SetTextI18n")
         override fun onPostExecute(result: String?) {
             progressBar.visibility = View.GONE
 
