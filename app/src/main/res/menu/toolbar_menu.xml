@@ -1,0 +1,25 @@
+<!-- menu_main.xml -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_dropdown"
+        android:title="Options"
+        android:icon="@drawable/menu"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/menu_reset_apikey"
+                app:showAsAction="always"
+                android:title="修改APIKey" />
+            <item
+                android:id="@+id/menu_history"
+                android:title="历史记录"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/menu_about"
+                app:showAsAction="never"
+                android:title="关于" />
+        </menu>
+    </item>
+</menu>

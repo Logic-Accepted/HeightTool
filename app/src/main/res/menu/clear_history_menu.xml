@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_export"
+        android:title="导出"/>
+
+    <item
+        android:id="@+id/menu_analyse"
+        android:title="分析"/>
+
+    <item
+        android:id="@+id/menu_clear_history"
+        android:title="清除历史记录" />
+</menu>

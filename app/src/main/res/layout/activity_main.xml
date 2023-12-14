@@ -1,0 +1,70 @@
+<!-- activity_main.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="?attr/actionBarTheme"
+        android:layout_alignParentTop="true"
+        android:elevation="4dp" />
+
+    <EditText
+        android:id="@+id/editTextKey"
+        android:layout_width="300dp"
+        android:layout_height="80dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="120dp"
+        android:layout_marginEnd="60dp"
+        android:visibility="gone"
+        android:hint="Key" />
+
+    <EditText
+        android:id="@+id/editTextCx"
+        android:layout_width="300dp"
+        android:layout_height="80dp"
+        android:layout_below="@+id/editTextKey"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="120dp"
+        android:layout_marginEnd="60dp"
+        android:hint="  原ID/长ID/UUID"
+        android:importantForAutofill="no" />
+
+    <Button
+        android:id="@+id/buttonSendRequest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editTextCx"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp"
+        android:text="查询" />
+
+    <TextView
+        android:id="@+id/textViewResult"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_below="@+id/buttonSendRequest"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="84dp"
+        android:gravity="center"
+        android:textSize="25sp" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_below="@+id/buttonSendRequest"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true"/>
+</RelativeLayout>
