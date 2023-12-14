@@ -90,13 +90,13 @@ class MainActivity : AppCompatActivity() {
 
     // 检查一下uuid合不合法，不然后面保存的时候会崩
     private fun isValidCx(cx: String): Boolean {
-        /*return try {
+        return try {
             UUID.fromString(cx)
             true
         } catch (e: IllegalArgumentException) {
             false
-        }*/
-        return true
+        }
+        // return true
     }
 
     // 这是输入apikey的对话框
@@ -155,7 +155,7 @@ class MainActivity : AppCompatActivity() {
     private fun showAboutDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("关于")
-        builder.setMessage("一些字儿。")
+        builder.setMessage("作者:\nhttps://github.com/Logic-Accepted\n项目地址:\nhttps://github.com/Logic-Accepted/HeightTool/")
         builder.setPositiveButton("确定") { _, _ -> }
 
         val dialog = builder.create()
@@ -274,7 +274,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d("Point", "准备保存了喵")
             } else {
                 textViewResult.text = "Error: $code"
-                saveToHistory(result)
+                //saveToHistory(result)
                 //Log.d("Point", "准备保存了，虽然不是200喵")
                 // 不是200不配保存喵
             }
