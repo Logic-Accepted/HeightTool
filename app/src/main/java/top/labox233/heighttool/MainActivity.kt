@@ -1,17 +1,20 @@
 package top.labox233.heighttool
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.icu.text.SimpleDateFormat
 import android.os.AsyncTask
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
@@ -19,11 +22,13 @@ import androidx.appcompat.widget.Toolbar
 import java.io.BufferedReader
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.google.gson.JsonSyntaxException
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
+import java.net.SocketTimeoutException
 import java.net.URL
 import java.net.URLEncoder
 import java.util.Date
@@ -37,7 +42,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var editTextCx: EditText
     private lateinit var buttonSendRequest: Button
     private lateinit var textViewResult: TextView
-    private lateinit var textViewResultRaw: TextView
+    //private lateinit var textViewResultRaw: TextView
     private lateinit var progressBar: ProgressBar
 
     private lateinit var sharedPreferences: SharedPreferences
@@ -47,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // 主 activity
         setContentView(R.layout.activity_main)
-
+        //setScreenCaptureCallback()
         //设置 toolbar
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -77,8 +82,7 @@ class MainActivity : AppCompatActivity() {
 
             if (isValidCx(cx)) {
                 // 构建API请求URL
-                val apiUrl = "example.com?key=${URLEncoder.encode(key, "UTF-8")}&cx=${URLEncoder.encode(cx, "UTF-8")}"
-
+                val apiUrl = "https://exam.ple.example/?key=${URLEncoder.encode(key, "UTF-8")}&cx=${URLEncoder.encode(cx, "UTF-8")}"
                 // 发送GET请求
                 SendGetRequestTask().execute(apiUrl)
             } else {
@@ -86,8 +90,21 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "原ID/长ID/UUID不合法，请检查。", Toast.LENGTH_SHORT).show()
             }
         }
-
     }
+
+    /*private fun setScreenCaptureCallback() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val screenCaptureCallback = @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            object : Activity.ScreenCaptureCallback {
+                override fun onScreenCaptured() {
+                    return true
+                }
+            }
+
+            // 注册监听器
+            registerActivityScreenCaptureCallback(screenCaptureCallback)
+        }
+    }*/
 
     // 检查一下uuid合不合法，不然后面保存的时候会崩
     private fun isValidCx(cx: String): Boolean {
@@ -97,7 +114,7 @@ class MainActivity : AppCompatActivity() {
         } catch (e: IllegalArgumentException) {
             false
         }
-        // return true
+         //return true
     }
 
     // 这是输入apikey的对话框
@@ -117,6 +134,7 @@ class MainActivity : AppCompatActivity() {
             // 保存用户输入的key到SharedPreferences
             val enteredKey = input.text.toString()
             sharedPreferences.edit().putString("key", enteredKey).apply()
+            Toast.makeText(this, "记住啦", Toast.LENGTH_SHORT).show()
             editTextKey.setText(enteredKey)
         }
 
@@ -133,7 +151,6 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.menu_history -> {
                 startActivity(Intent(this, HistoryActivity::class.java))
-                //startActivity(Intent(this, PreviewActivity::class.java))
                 true
             }
             R.id.menu_about -> {
@@ -141,7 +158,6 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.menu_reset_apikey -> {
-                //重新设置apikey啊
                 showKeyInputDialog()
                 true
             }
@@ -198,6 +214,9 @@ class MainActivity : AppCompatActivity() {
             val url = URL(urlString)
             val urlConnection = url.openConnection() as HttpURLConnection
 
+            // 设置连接超时时间为10秒
+            urlConnection.connectTimeout = 10000
+
             try {
                 val inputStream = urlConnection.inputStream
                 val bufferedReader = BufferedReader(InputStreamReader(inputStream))
@@ -210,6 +229,14 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 return stringBuilder.toString()
+            } catch (e: SocketTimeoutException) {
+                // 处理超时异常
+                e.printStackTrace()
+                return "TimeoutError"
+            } catch (e: Exception) {
+                // 处理其他异常，确保不再抛出异常
+                e.printStackTrace()
+                return "Error"
             } finally {
                 urlConnection.disconnect()
             }
@@ -258,32 +285,49 @@ class MainActivity : AppCompatActivity() {
         @SuppressLint("SetTextI18n")
         override fun onPostExecute(result: String?) {
             progressBar.visibility = View.GONE
+            if (result == "TimeoutError") {
+                Toast.makeText(this@MainActivity, "连接超时，请检查服务器状态。", Toast.LENGTH_SHORT).show()
+                return
+            } else if (result == "Error") {
+                Toast.makeText(this@MainActivity, "未知错误。", Toast.LENGTH_SHORT).show()
+                return
+            }
 
-            textViewResultRaw.text = result
-            val gson = Gson()
-            val jsonObject: JsonObject = gson.fromJson(result, JsonObject::class.java)
+            try {
 
-            val code = jsonObject.get("code").asInt
+                //textViewResultRaw.text = result
+                val gson = Gson()
+                val jsonObject: JsonObject = gson.fromJson(result, JsonObject::class.java)
 
-            if (code == 200) {
-                val dataObject = jsonObject.getAsJsonObject("data")
+                val code = jsonObject.get("code").asInt
 
-                val scale = String.format("%.3f", dataObject.get("scale").asString.toDouble())
-                val height = String.format("%.3f", dataObject.get("height").asString.toDouble())
-                val currentHeight = String.format("%.3f", dataObject.get("currentHeight").asDouble)
-                val maxHeight = String.format("%.3f", dataObject.get("maxHeight").asDouble)
-                val minHeight = String.format("%.3f", dataObject.get("minHeight").asDouble)
+                if (code == 200) {
+                    val dataObject = jsonObject.getAsJsonObject("data")
 
-                textViewResult.text = "S值: $scale\nH值: $height\n目前身高: $currentHeight\n最大值: $maxHeight\n最小值: $minHeight"
-                textViewResultRaw.text = result
-                saveToHistory(result)
-                Log.d("Point", "准备保存了喵")
-            } else {
-                textViewResult.text = "Error: $code"
-                //saveToHistory(result)
-                //Log.d("Point", "准备保存了，虽然不是200喵")
-                // 不是200不配保存喵
+                    val scale = String.format("%.3f", dataObject.get("scale").asString.toDouble())
+                    val height = String.format("%.3f", dataObject.get("height").asString.toDouble())
+                    val currentHeight =
+                        String.format("%.3f", dataObject.get("currentHeight").asDouble)
+                    val maxHeight = String.format("%.3f", dataObject.get("maxHeight").asDouble)
+                    val minHeight = String.format("%.3f", dataObject.get("minHeight").asDouble)
+
+                    textViewResult.text =
+                        "S值: $scale\nH值: $height\n目前身高: $currentHeight\n最大值: $maxHeight\n最小值: $minHeight"
+                    //textViewResultRaw.text = result
+                    saveToHistory(result)
+                    Log.d("Point", "准备保存了喵")
+                } else {
+                    textViewResult.text = "Error: $code"
+                    saveToHistory(result)
+                    Log.d("Point", "准备保存了，虽然不是200喵")
+                    // 不是200不配保存喵
+                }
+            } catch (e: JsonSyntaxException){
+                e.printStackTrace()
+                Toast.makeText(this@MainActivity, "Json错误，请检查api返回内容。", Toast.LENGTH_SHORT).show()
             }
         }
+
+
     }
 }

@@ -11,22 +11,33 @@
         android:roundIcon="@drawable/icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.HeightTool"
-        tools:targetApi="31">
+        tools:targetApi="34">
         <activity
             android:name=".MainActivity"
-
+            android:label="主页面"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".HistoryActivity" />
-        <activity android:name=".PreviewActivity" />
+        <activity android:name=".HistoryActivity"
+                  android:label="历史记录" />
+        <activity android:name=".PreviewActivity"
+                  android:label="历史记录预览"/>
+        <activity
+            android:name=".AnalyseActivity"
+            android:label="分析"
+            android:parentActivityName=".HistoryActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".HistoryActivity" />
+        </activity>
+
 
     </application>
     <uses-permission android:name="android.permission.INTERNET"
         tools:ignore="ManifestOrder" />
+    <uses-permission android:name="android.permission.DETECT_SCREEN_CAPTURE"/>
 
 </manifest>

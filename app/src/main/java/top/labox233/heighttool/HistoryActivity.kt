@@ -77,32 +77,34 @@ class HistoryActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_clear_history -> {
-                // 处理清除历史记录选项的点击事件
-                checkHistoryFolder()
+                checkHistoryFolder("menu_clear_history")
                 true
             }
             R.id.menu_export -> {
-                // 处理导出历史记录选项的点击事件
-                Toast.makeText(this, "在做", Toast.LENGTH_SHORT).show()
+                checkHistoryFolder("menu_export")
                 true
             }
             R.id.menu_analyse -> {
-                // 处理分析历史记录选项的点击事件
-                Toast.makeText(this, "在做", Toast.LENGTH_SHORT).show()
+                checkHistoryFolder("menu_analyse")
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun checkHistoryFolder() {
+    private fun checkHistoryFolder(menuItem: String) {
         val historyDir = getHistoryDirectory()
         val content = historyDir.list() // 文件list
         if (content.isNullOrEmpty()) {
             Toast.makeText(this, "历史记录已然空空", Toast.LENGTH_SHORT).show()
         }
         else{
-            showClearHistoryDialog()
+            return when (menuItem){
+                "menu_clear_history" -> showClearHistoryDialog()
+                "menu_export" -> Toast.makeText(this, "在做", Toast.LENGTH_SHORT).show()
+                "menu_analyse" -> startActivity(Intent(this, AnalyseActivity::class.java))
+                else -> Toast.makeText(this, "?", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
