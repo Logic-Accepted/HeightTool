@@ -1,20 +1,17 @@
 package top.labox233.heighttool
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.icu.text.SimpleDateFormat
 import android.os.AsyncTask
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
@@ -40,6 +37,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var editTextKey: EditText
     private lateinit var editTextCx: EditText
+    private lateinit var editTextCode: EditText
     private lateinit var buttonSendRequest: Button
     private lateinit var textViewResult: TextView
     //private lateinit var textViewResultRaw: TextView
@@ -60,6 +58,7 @@ class MainActivity : AppCompatActivity() {
 
         editTextKey = findViewById(R.id.editTextKey)
         editTextCx = findViewById(R.id.editTextCx)
+        editTextCode = findViewById(R.id.editTextCode)
         buttonSendRequest = findViewById(R.id.buttonSendRequest)
         textViewResult = findViewById(R.id.textViewResult)
         progressBar = findViewById(R.id.progressBar)
@@ -79,12 +78,20 @@ class MainActivity : AppCompatActivity() {
         buttonSendRequest.setOnClickListener {
             val key = editTextKey.text.toString()
             val cx = editTextCx.text.toString()
+            val code = editTextCode.text.toString()
 
             if (isValidCx(cx)) {
-                // 构建API请求URL
-                val apiUrl = "https://exam.ple.example/?key=${URLEncoder.encode(key, "UTF-8")}&cx=${URLEncoder.encode(cx, "UTF-8")}"
+                // 基础API URL
+                var apiUrl = "https://exam.ple.example/?key=${URLEncoder.encode(key, "UTF-8")}&cx=${URLEncoder.encode(cx, "UTF-8")}"
+
+                // 如果 code 不为 null，则追加 code 参数
+                if (code.isNotEmpty()) {
+                    apiUrl += "&code=${URLEncoder.encode(code, "UTF-8")}"
+                }
+
                 // 发送GET请求
                 SendGetRequestTask().execute(apiUrl)
+
             } else {
                 // 输入不合法，显示提示信息给用户
                 Toast.makeText(this, "原ID/长ID/UUID不合法，请检查。", Toast.LENGTH_SHORT).show()
@@ -285,22 +292,20 @@ class MainActivity : AppCompatActivity() {
         @SuppressLint("SetTextI18n")
         override fun onPostExecute(result: String?) {
             progressBar.visibility = View.GONE
+            val gson = Gson()
+            val jsonObject: JsonObject = gson.fromJson(result, JsonObject::class.java)
+            val code = jsonObject.get("code").asInt
             if (result == "TimeoutError") {
                 Toast.makeText(this@MainActivity, "连接超时，请检查服务器状态。", Toast.LENGTH_SHORT).show()
                 return
-            } else if (result == "Error") {
-                Toast.makeText(this@MainActivity, "未知错误。", Toast.LENGTH_SHORT).show()
+            } else if (result == "Error" && code == 202) {
+                Toast.makeText(this@MainActivity, "首次查询请输入一个新的好友码。", Toast.LENGTH_SHORT).show()
                 return
+            } else if (result == "Error"){
+                Toast.makeText(this@MainActivity, "未知错误", Toast.LENGTH_SHORT).show()
             }
 
             try {
-
-                //textViewResultRaw.text = result
-                val gson = Gson()
-                val jsonObject: JsonObject = gson.fromJson(result, JsonObject::class.java)
-
-                val code = jsonObject.get("code").asInt
-
                 if (code == 200) {
                     val dataObject = jsonObject.getAsJsonObject("data")
 
@@ -316,6 +321,8 @@ class MainActivity : AppCompatActivity() {
                     //textViewResultRaw.text = result
                     saveToHistory(result)
                     Log.d("Point", "准备保存了喵")
+                } else if(code == 202){
+                    textViewResult.text = "首次使用需要输入一个新的好友码"
                 } else {
                     textViewResult.text = "Error: $code"
                     saveToHistory(result)

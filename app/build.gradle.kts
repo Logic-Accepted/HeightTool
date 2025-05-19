@@ -19,8 +19,8 @@ android {
         applicationId = "top.labox233.heighttool"
         minSdk = 24
         targetSdk = 33
-        versionCode = 1
-        versionName = "1.2.1"
+        versionCode = 101
+        versionName = "1.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
